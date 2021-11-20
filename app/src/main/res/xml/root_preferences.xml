@@ -6,6 +6,10 @@
             app:key="dismiss_filter_behaviour"
             app:title="@string/pref_dismiss_filter_title"
             app:defaultValue="true"/>
+        <SwitchPreferenceCompat
+            app:key="use_decimals"
+            app:title="@string/pref_use_decimals"
+            app:defaultValue="true"/>
         <ListPreference
             android:defaultValue="3"
             android:entries="@array/itemReturnedFilterModeEntries"
