@@ -1,7 +1,5 @@
 package org.ebur.debitum.database;
 
-import android.content.SharedPreferences;
-import androidx.preference.PreferenceManager;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -9,8 +7,7 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-import org.ebur.debitum.ui.SettingsFragment;
-
+import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -105,11 +102,7 @@ public class Transaction {
      * @return Returns a properly formatted Amount (2 decimal places, decimal separator from locale)
      */
     public static String formatMonetaryAmount(int amount, Locale locale) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(requireActivity());
-        float div = 1;
-        if (pref.getBoolean(SettingsFragment.PREF_KEY_USE_DECIMALS))
-            div = 100.0;
-        return String.format(locale,"%.2f", amount/div);
+        return NumberFormat.getCurrencyInstance(locale).format(amount);
     }
 
     /**
