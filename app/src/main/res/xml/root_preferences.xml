@@ -8,7 +8,7 @@
             app:defaultValue="true"/>
         <SwitchPreferenceCompat
             app:key="use_decimals"
-            app:title="@string/pref_use_decimals"
+            app:title="@string/pref_use_decimals_title"
             app:defaultValue="true"/>
         <ListPreference
             android:defaultValue="3"

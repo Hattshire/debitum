@@ -1,6 +1,7 @@
 package org.ebur.debitum.ui.edit_transaction;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -25,6 +26,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.preference.PreferenceManager;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.FragmentNavigator;
@@ -42,6 +44,7 @@ import org.ebur.debitum.R;
 import org.ebur.debitum.database.Person;
 import org.ebur.debitum.database.Transaction;
 import org.ebur.debitum.database.TransactionWithPerson;
+import org.ebur.debitum.ui.SettingsFragment;
 import org.ebur.debitum.ui.TextInputLayoutErrorResetter;
 import org.ebur.debitum.util.FileUtils;
 import org.ebur.debitum.util.Utilities;
@@ -91,6 +94,7 @@ public class EditTransactionFragment extends DialogFragment {
     private AutoCompleteTextView editReturnDate;
     private RecyclerView imageRecyclerView;
     private EditTransactionImageAdapter imageAdapter;
+    private SharedPreferences pref;
 
     // launcher for picking a new image file
     protected final ActivityResultLauncher<String> addImageLauncher =
@@ -126,6 +130,7 @@ public class EditTransactionFragment extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
+        pref = PreferenceManager.getDefaultSharedPreferences(requireActivity());
 
         viewModel = new ViewModelProvider(this).get(EditTransactionViewModel.class);
         personFilterViewModel = new ViewModelProvider(requireActivity()).get(PersonFilterViewModel.class);
@@ -327,7 +332,12 @@ public class EditTransactionFragment extends DialogFragment {
         // IMPORTANT: set switchIsMonetaryView _before_ setting amount, because on setting amount the
         // AmountTextWatcher::afterTextChanged is called, and within this method isMonetary is needed to apply correct formatting!
         switchIsMonetary.setChecked(txn.transaction.isMonetary);
-        editAmount.setText(txn.transaction.getFormattedAmount(false));
+        
+        if (pref.getBoolean(SettingsFragment.PREF_KEY_USE_DECIMALS, true))
+            editAmount.setText(txn.transaction.getFormattedAmount(false));
+        else
+            editAmount.setText(Integer.toString(txn.transaction.amount/100));
+
         editDescription.setText(txn.transaction.description);
         viewModel.setTimestamp(txn.transaction.timestamp);
         editDate.setText(Utilities.formatDate(viewModel.getTimestamp(), requireContext()));
@@ -342,8 +352,11 @@ public class EditTransactionFragment extends DialogFragment {
     private void evaluatePresets() {
         // TODO: move all those presets to viewModel (presetIdTransaction, presetType, preset...)
         int presetAmount = requireArguments().getInt(ARG_PRESET_AMOUNT, 0);
-        if (presetAmount != 0) { // amount > 0 means person gave to user --> gave radio must be checked
-            editAmount.setText(Transaction.formatMonetaryAmount(Math.abs(presetAmount)));
+        if (presetAmount != 0) { // amount > 0 means person gave to user --> gave radio must be checked 
+            if (pref.getBoolean(SettingsFragment.PREF_KEY_USE_DECIMALS, true))
+                editAmount.setText(Transaction.formatMonetaryAmount(Math.abs(presetAmount)));
+            else
+                editAmount.setText(Integer.toString(Math.abs(presetAmount)/100));
             gaveRadio.setChecked(presetAmount>0);
         }
 
@@ -414,6 +427,9 @@ public class EditTransactionFragment extends DialogFragment {
                 Toast.makeText(requireActivity(), R.string.edit_transaction_wrong_amount_format, Toast.LENGTH_SHORT).show();
                 return;
             }
+
+            if (!pref.getBoolean(SettingsFragment.PREF_KEY_USE_DECIMALS, true))
+                amount = amount*100;
 
             // get person id from selected person name
             int idPerson = -1;
@@ -552,7 +568,7 @@ public class EditTransactionFragment extends DialogFragment {
             Toast.makeText(requireContext(), R.string.edit_transaction_snackbar_max_amount, Toast.LENGTH_SHORT).show();
         }
 
-        if (viewModel.isMoneyTransaction()) {
+        if (viewModel.isMoneyTransaction() && !pref.getBoolean(SettingsFragment.PREF_KEY_USE_DECIMALS, true)) {
             // add decSep two digits from the right, while adding leading zeros if needed
             // this is accomplished by removing decSep --> converting to int --> dividing by 100 --> converting to local String
             formattedAmount = Transaction.formatMonetaryAmount(Integer.parseInt(formattedAmount), Locale.getDefault());

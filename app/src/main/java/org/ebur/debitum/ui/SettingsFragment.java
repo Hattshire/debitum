@@ -49,6 +49,7 @@ public class SettingsFragment extends PreferenceFragmentCompat {
     public final static String PREF_KEY_DISMISS_FILTER_BEHAVIOUR = "dismiss_filter_behaviour";
     public final static String PREF_KEY_ITEM_RETURNED_STANDARD_FILTER = "item_returned_standard_filter";
     public final static String PREF_KEY_DATE_FORMAT = "date_format";
+    public final static String PREF_KEY_USE_DECIMALS = "use_decimals";
     public final static String FILENAME_DB = "debitum.db";
 
     private final ActivityResultLauncher<String[]> restoreLauncher =
@@ -79,6 +80,12 @@ public class SettingsFragment extends PreferenceFragmentCompat {
         if (dismissFilterPref != null) {
             dismissFilterPref.setSummaryOff(R.string.pref_dismiss_filter_summary_false);
             dismissFilterPref.setSummaryOn(R.string.pref_dismiss_filter_summary_true);
+        }
+
+        SwitchPreferenceCompat useDecimalsPref = findPreference(PREF_KEY_DISMISS_FILTER_BEHAVIOUR);
+        if (useDecimalsPref != null) {
+            useDecimalsPref.setSummaryOff(R.string.pref_use_decimals_summary_false);
+            useDecimalsPref.setSummaryOn(R.string.pref_use_decimals_summary_true);
         }
 
         ListPreference itemReturnedFilterPref = findPreference(PREF_KEY_ITEM_RETURNED_STANDARD_FILTER);

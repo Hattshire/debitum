@@ -7,7 +7,6 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-import java.text.NumberFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -102,7 +101,7 @@ public class Transaction {
      * @return Returns a properly formatted Amount (2 decimal places, decimal separator from locale)
      */
     public static String formatMonetaryAmount(int amount, Locale locale) {
-        return NumberFormat.getCurrencyInstance(locale).format(amount);
+        return String.format(locale,"%.2f", amount/100.0);
     }
 
     /**
