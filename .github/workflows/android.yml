@@ -26,6 +26,8 @@ jobs:
       run: ./gradlew build
     - name: Assemble apk
       run: ./gradlew assembleRelease
+    - name: Find to dbg
+      run: find .
     - name: Sign
       id: signArtifact
       uses: r0adkll/sign-android-release@v1.0.1
